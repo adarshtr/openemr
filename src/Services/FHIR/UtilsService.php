@@ -62,7 +62,9 @@ class UtilsService
         $quantity->setCode($code);
         $quantity->setValue($value);
         $quantity->setUnit($unit);
-        $quantity->setSystem(FhirCodeSystemConstants::UNITS_OF_MEASURE);
+	$quantity->setSystem(FhirCodeSystemConstants::UNITS_OF_MEASURE);
+	
+	return $quantity;
     }
 
     public static function createCoding($code, $display, $system): FHIRCoding

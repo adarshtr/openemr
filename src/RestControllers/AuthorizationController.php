@@ -121,7 +121,6 @@ class AuthorizationController
         $gbl = \RestConfig::GetInstance();
         $this->restConfig = $gbl;
         $this->logger = new SystemLogger();
-
         $this->siteId = $_SESSION['site_id'] ?? $gbl::$SITE;
         $this->authBaseUrl = $GLOBALS['webroot'] . '/oauth2/' . $this->siteId;
         $this->authBaseFullUrl = self::getAuthBaseFullURL();
@@ -615,7 +614,8 @@ class AuthorizationController
         if ($this->grantType === 'authorization_code') {
             $this->logger->debug(
                 "logging global params",
-                ['site_addr_oath' => $GLOBALS['site_addr_oath'], 'web_root' => $GLOBALS['web_root'], 'site_id' => $_SESSION['site_id']]
+                ['site_addr_oath' => $GLOBALS['site_addr_oath'], 'web_root' => $GLOBALS['web_root'],
+                 'site_id' => $_SESSION['site_id']]
             );
             $fhirServiceConfig = new ServerConfig();
             $expectedAudience = [
@@ -1062,6 +1062,7 @@ class AuthorizationController
         if ($this->grantType === 'refresh_token') {
             $request = $this->createServerRequest();
         }
+        
         // Finally time to init the server.
         $server = $this->getAuthorizationServer();
         try {

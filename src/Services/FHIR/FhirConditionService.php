@@ -2,6 +2,7 @@
 
 namespace OpenEMR\Services\FHIR;
 
+use DateTime;
 use OpenEMR\FHIR\R4\FHIRElement\FHIRCodeableConcept;
 use OpenEMR\FHIR\R4\FHIRElement\FHIRCoding;
 use OpenEMR\FHIR\R4\FHIRElement\FHIRId;
@@ -17,6 +18,8 @@ use OpenEMR\Services\Search\FhirSearchParameterDefinition;
 use OpenEMR\Services\Search\SearchFieldType;
 use OpenEMR\Services\Search\ServiceField;
 use OpenEMR\Validators\ProcessingResult;
+use OpenEMR\FHIR\R4\FHIRElement\FHIRNoteType;
+use OpenEMR\FHIR\R4\FHIRElement\FHIRPeriod;
 
 /**
  * FHIR Condition Service
@@ -87,16 +90,37 @@ class FhirConditionService extends FhirServiceBase implements IResourceUSCIGProf
         $this->populateVerificationStatus($dataRecord, $conditionResource);
         $this->populateCode($dataRecord, $conditionResource);
         $this->populateSubject($dataRecord, $conditionResource);
-
+        
         // non-ONC requirements
         $this->populateEncounter($dataRecord, $conditionResource);
 
+        $this->populateOnsetDate($dataRecord, $conditionResource);
+        $this->populateNote($dataRecord, $conditionResource);
 
         if ($encode) {
             return json_encode($conditionResource);
         } else {
             return $conditionResource;
         }
+    }
+    private function populateNote($dataRecord, FHIRCondition $conditionResource){
+        if (!empty($dataRecord['comments'])) {
+            $note = new FHIRNoteType();
+            $note->setValue($dataRecord['comments']);
+            $conditionResource->addNote($note);
+        }
+    }
+    private function populateOnsetDate($dataRecord, FHIRCondition $conditionResource){
+            $onsetPeriod = new FHIRPeriod(); 
+        if (isset($dataRecord['begdate'])) {
+            $datetime = new DateTime($dataRecord['begdate']);
+            $onsetPeriod->setStart($datetime->format(DateTime::ATOM));
+        }
+        if (isset($dataRecord['enddate'])) {
+            $datetime = new DateTime($dataRecord['enddate']);
+            $onsetPeriod->setEnd($datetime->format(DateTime::ATOM));
+        }
+        $conditionResource->setOnsetPeriod($onsetPeriod);
     }
 
     private function populateEncounter($dataRecord, FHIRCondition $conditionResource)

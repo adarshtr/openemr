@@ -87,6 +87,7 @@ class FhirObservationService extends FhirServiceBase implements IResourceSearcha
      */
     public function getAll($fhirSearchParameters, $puuidBind = null): ProcessingResult
     {
+        $this->logger->error($fhirSearchParameters);
         $fhirSearchResult = new ProcessingResult();
         try {
             if (isset($fhirSearchParameters['_id'])) {

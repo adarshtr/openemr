@@ -183,6 +183,8 @@ class ObservationLabService extends BaseService
      */
     public function getAll($search = array(), $isAndCondition = true, $puuidBind = null)
     {
+        $this->logger->error(print_r($search));
+          //error_log(print_r($search));
         $searchArgs = [];
         if (isset($puuidBind)) {
             $searchArgs['puuid'] = new TokenSearchField('uuid', [$puuidBind], true);

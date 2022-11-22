@@ -107,6 +107,7 @@ class FhirObservationLaboratoryService extends FhirServiceBase implements IPatie
      */
     protected function searchForOpenEMRRecords($openEMRSearchParameters): ProcessingResult
     {
+        $this->logger->error(print_r($openEMRSearchParameters));
         $processingResult = new ProcessingResult();
 
         try {

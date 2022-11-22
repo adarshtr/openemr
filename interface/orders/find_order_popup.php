@@ -52,11 +52,13 @@ if (isset($_GET['typeid'])) {
             <?php
             if (isset($_GET['addfav'])) {
                 $order = json_encode($ptrow);
+                
                 echo "opener.set_new_fav($order);\nwindow.close();";
             }
             $i = 0;
             $t = 0;
             do {
+                
                 if (!isset($grporders[$i]['procedure_type_id'])) {
                     echo "opener.set_proc_type(" . js_escape($typeid) . ", " . js_escape($name) . ", " . js_escape($codes) . ", " . js_escape($transport) . ", " . js_escape($proctype_name) . ", " . js_escape($testid) . ", '0');\n";
                 } else {
@@ -67,6 +69,7 @@ if (isset($_GET['typeid'])) {
                     $transport = trim($ptrow['transport']);
                     $testid = trim($ptrow['procedure_code']);
                     $proctype_name = trim($ptrow['procedure_type_name']);
+                    
                     echo "opener.set_proc_type(" . js_escape($typeid) . ", " . js_escape($name) . ", " . js_escape($codes) . ", " . js_escape($transport) . ", " . js_escape($proctype_name) . ", " . js_escape($testid) . ", " . js_escape($t) . ");\n";
                 }
                 // This is to generate the "Questions at Order Entry" for the Procedure Order form.
@@ -82,8 +85,9 @@ if (isset($_GET['typeid'])) {
                         echo ' opener.set_proc_html("", "");' . "\n";
                     }
                 }
+                
                 $i++;
-            } while ($grporders[$i]['procedure_type_id']);
+            } while (isset($grporders[$i]['procedure_type_id']));
             ?>
         }
         window.close();

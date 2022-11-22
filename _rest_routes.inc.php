@@ -9882,6 +9882,7 @@ RestConfig::$FHIR_ROUTE_MAP = array(
      */
     "GET /fhir/Observation" => function (HttpRestRequest $request) {
         $getParams = $request->getQueryParams();
+        error_log(print($request));
         if ($request->isPatientRequest()) {
             // only allow access to data of binded patient
             $return = (new FhirObservationRestController())->getAll($getParams, $request->getPatientUUIDString());

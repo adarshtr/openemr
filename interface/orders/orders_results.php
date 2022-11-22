@@ -19,10 +19,12 @@ require_once("$srcdir/lab.inc");
 use OpenEMR\Common\Acl\AclMain;
 use OpenEMR\Common\Twig\TwigContainer;
 use OpenEMR\Core\Header;
+use OpenEMR\Events\Procedure\ProcedureSignResultsEvent;
+use OpenEMR\Events\User\UserCreatedEvent;
 
 // Indicates if we are entering in batch mode.
 $form_batch = empty($_GET['batch']) ? 0 : 1;
-
+error_log(print_r($_GET));
 // Indicates if we are entering in review mode.
 $form_review = empty($_GET['review']) ? 0 : 1;
 
@@ -47,6 +49,7 @@ if (!empty($_GET['set_pid']) && $form_review) {
     setpid($_GET['set_pid']);
 
     $result = getPatientData($pid, "*, DATE_FORMAT(DOB,'%Y-%m-%d') as DOB_YMD");
+    
     ?>
     <script>
         parent.left_nav.setPatient(<?php echo js_escape($result['fname'] . " " . $result['lname']) . "," . js_escape($pid) . "," . js_escape($result['pubpid']) . ",''," . js_escape(" " . xl('DOB') . ": " . oeFormatShortDate($result['DOB_YMD']) . " " . xl('Age') . ": " . getPatientAge($result['DOB_YMD'])); ?>);
@@ -80,6 +83,9 @@ function QuotedOrNull($fld)
 }
 
 $current_report_id = 0;
+$signResult = $_POST;
+$procedureSignResultsEvent = new ProcedureSignResultsEvent($signResult);
+//$procedureSignResultsEvent = $GLOBALS["kernel"]->getEventDispatcher()->dispatch(ProcedureSignResultsEvent::EVENT_HANDLE, $procedureSignResultsEvent, 10);   
 
 if (!empty($_POST['form_submit']) && !empty($_POST['form_line'])) {
     foreach ($_POST['form_line'] as $lino => $line_value) {
@@ -148,11 +154,18 @@ if (!empty($_POST['form_submit']) && !empty($_POST['form_line'])) {
             if ($result_id) { // result already exists
                 sqlStatement("UPDATE procedure_result SET $sets " .
                     "WHERE procedure_result_id = '" . add_escape_custom($result_id) . "'");
+                    
             } else { // Add new result.
                 $result_id = sqlInsert("INSERT INTO procedure_result SET $sets");
+                
             }
+
+            
         }
     } // end foreach
+    $GLOBALS["kernel"]->getEventDispatcher()->dispatch(ProcedureSignResultsEvent::EVENT_HANDLE, $procedureSignResultsEvent, 10);
+
+            
 }
 ?>
 <html>
@@ -744,9 +757,9 @@ if (!empty($_POST['form_submit']) && !empty($_POST['form_line'])) {
                 <?php
                 if ($form_review) {
                     // if user authorized for pending review.
-                    if ($reviewauth) { ?>
+                    if ($reviewauth) { ?>       
                         <button type="submit" class="btn btn-primary" name='form_submit' value='<?php echo xla('Sign Results'); ?>'>
-                            <?php echo xlt('Sign Results'); ?>
+                            <?php echo xlt('Sign Results'); ?>  
                         </button>
                     <?php } else { ?>
                         <button type="button" class="btn btn-primary" name='form_submit' value='<?php echo xla('Sign Results'); ?>' onclick="alert(<?php echo attr_js(xl('Not authorized')) ?>);">
